@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Permisos y Vacaciones - Coordinador</title>
+  <link rel="stylesheet" href="calendario_vacaciones.css">
+</head>
+<body>
+    
+    <nav class="top-nav">
+        <a href="calendario.html" class="btn-volver">← Volver al Inicio</a>
+    </nav>
+
+  <header>
+    <h1>Permisos y Vacaciones</h1>
+    <p>
+      Como coordinador, se requiere administrar los <strong>permisos y vacaciones</strong> de los funcionarios
+      para <strong>aceptarlos o rechazarlos</strong> dependiendo del motivo y/o disponibilidad.
+    </p>
+  </header>
+
+  
+
+  <main>
+    <section>
+      <h2 id="mes-actual">Calendario</h2>
+      <table id="tabla-calendario">
+        <thead>
+          <tr>
+            <th>Lun</th>
+            <th>Mar</th>
+            <th>Mié</th>
+            <th>Jue</th>
+            <th>Vie</th>
+            <th>Sáb</th>
+            <th>Dom</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-calendario">
+          <!-- Días generados con JavaScript -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- Modal de solicitudes -->
+  <div id="modal-solicitudes" class="modal">
+    <div class="modal-contenido">
+      <span class="cerrar" id="cerrar-modal">&times;</span>
+      <h3>Solicitudes del <span id="fecha-modal"></span></h3>
+      
+      <div id="lista-solicitudes">
+        <!--  insertan solicitudes dinámicamente -->
+      </div>
+
+      <div id="acciones-solicitud" style="display: none;">
+        <textarea id="motivo" placeholder="Escribe el motivo de la decisión..."></textarea>
+        <div class="botones">
+          <button class="btn aceptar">Aceptar</button>
+          <button class="btn rechazar">Rechazar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <script src="calendario_vacaciones.js"></script>
+
+  <div id="notificacion-toast" class="toast-guardado">Guardado correctamente</div>
+
+
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurnoMed - Coordinador</title>
+    <link rel="stylesheet" href="calendario.css">
+</head>
+<body class="coordinador-view">
+    <div class="app-header">
+        <h1 class="app-title">TurnoMed</h1>
+        <p class="app-subtitle">Panel de Coordinación</p>
+    </div>
+
+    <nav class="top-nav">
+        <a href="index.html" class="back-btn">← Volver al Inicio</a>
+    </nav>
+    
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h2 class="month-title" id="monthYear"></h2>
+            <div class="calendar-nav">
+                <button id="prevMonth" class="btn">‹ Mes Anterior</button>
+                <button id="nextMonth" class="btn">Mes Siguiente ›</button>
+            </div>
+        </div>
+        
+        <div class="calendar-grid" id="calendarBody"></div>
+    </div>
+
+    <div id="modalTurno" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">Asignar Turno</h2>
+            <form id="turnoForm">
+                <div class="form-group">
+                    <label for="funcionario">Funcionario:</label>
+                    <select id="funcionario" required></select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="area">Área:</label>
+                    <select id="area" required></select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="horario">Horario:</label>
+                    <select id="horario" required></select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Asignar Turno</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification" class="notification hidden">
+        <span id="notificationMessage"></span>
+        <button id="undoButton" class="btn btn-small btn-undo">Deshacer</button>
+    </div>
+
+    <script src="calendario.js"></script>
+</body>
+</html>

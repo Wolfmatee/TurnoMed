@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es" data-role="coordinador" data-area="Urgencias">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TurnoMed - Gestión de Turnos</title>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="calendario.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+  
+</head>
+<body class="bg-light coordinador-view" data-role="coordinador" data-area="Urgencias">
+
+  <!-- Encabezado -->
+  <header class="app-header text-center py-4">
+    <h1 class="app-title">📅 TurnoMed</h1>
+    <p class="app-subtitle">Panel de Coordinación</p>
+  </header>
+
+  <!-- Navegación -->
+  <nav class="top-nav text-center mb-4">
+    <a href="index.html" class="btn btn-outline-secondary">← Volver al Inicio</a>
+  </nav>
+
+  
+  <!-- Calendario principal -->
+  <main class="container mb-5">
+    <div id="calendar"></div>
+  </main>
+
+  
+  <!-- Modal Unificado -->
+  <div id="modalTurno" class="modal" style="display: none;">
+  <div class="modal-content p-4 bg-white rounded shadow">
+    <span class="close float-end" id="closeModal" style="cursor: pointer;">&times;</span>
+    <h2 id="modalTitle" class="mb-4">Asignar Turno</h2>
+    <form id="turnoForm">
+      <div class="form-group mb-3">
+        <label for="funcionario">Funcionario:</label>
+        <select id="funcionario" class="form-select" required></select>
+      </div>
+
+      <div class="form-group mb-3">
+        <label for="area">Área:</label>
+        <select id="area" class="form-select" required></select>
+      </div>
+
+      <div class="turno">
+        <div class="form-group mb-4">
+            <label for="horario">Horario:</label>
+            <select id="horario" class="form-select" required>
+            <option value="">Seleccionar horario</option>
+            <option value="mañana">Mañana</option>
+            <option value="tarde">Tarde</option>
+            <option value="noche">Noche</option>
+            </select>
+        </div>
+    </div>
+    <button id="btnAbrirModal" class="btn btn-primary">Asignar Turno</button>
+    </form>
+  </div>
+</div>
+
+
+
+  <!-- Notificación Unificada -->
+  <div id="notification" class="alert alert-success alert-dismissible fade position-fixed bottom-0 end-0 m-4 d-none">
+    <div class="d-flex justify-content-between align-items-center">
+      <span id="notificationMessage">Turno asignado exitosamente</span>
+      <button id="undoButton" class="btn btn-sm btn-light ms-3">Deshacer</button>
+    </div>
+  </div>
+
+  <!-- Script personalizado -->
+  <script src="calendario.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+</body>
+</html>

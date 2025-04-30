@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurnoMed - Gestión de Usuarios</title>
+    <link rel="stylesheet" href="calendario.css">
+    <style>
+        /* Ajuste para centrar el cuerpo verticalmente */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            justify-content: space-between;
+            background-color: #f8f9fa;
+        }
+
+        .welcome-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem auto;
+            padding: 2rem;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .form-section, .users-section {
+            width: 100%;
+            max-width: 600px; /* Ajuste para que el formulario y la lista no sean demasiado anchos */
+        }
+
+        .role-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        footer {
+            margin-top: auto; /* Empuja el footer al final de la página */
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <h1 class="app-title">TurnoMed</h1>
+        <p class="app-subtitle">Gestión de Usuarios</p>
+    </div>
+
+    <div class="welcome-container">
+        <h2>Gestión de Cuentas de Usuarios</h2>
+        <p>Administra las cuentas del personal hospitalario: crea, edita o elimina usuarios según sea necesario.</p>
+
+        <!-- Sección para crear un nuevo usuario -->
+        <div class="role-card form-section">
+            <h3>Crear Nuevo Empleado</h3>
+            <form id="userForm">
+                <div class="form-group">
+                    <label for="name">Nombre:</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Correo:</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="position">Cargo:</label>
+                    <input type="text" id="position" required>
+                </div>
+                <div class="form-group">
+                    <label for="area">Área de Trabajo:</label>
+                    <select id="area" class="filter-select" required>
+                        <option value="">Seleccionar Área</option>
+                        <option value="Urgencias">Urgencias</option>
+                        <option value="Pediatría">Pediatría</option>
+                        <option value="Cirugía">Cirugía</option>
+                        <option value="Cardiología">Cardiología</option>
+                        <option value="Neurología">Neurología</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="role">Rol:</label>
+                    <select id="role" class="filter-select" required>
+                        <option value="">Seleccionar Rol</option>
+                        <option value="Administrador">Administrador</option>
+                        <option value="Coordinador">Coordinador</option>
+                        <option value="Funcionario">Funcionario</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+            </form>
+        </div>
+
+        <!-- Sección para consultar y gestionar usuarios -->
+        <div class="users-section">
+            <h3>Lista de Usuarios</h3>
+            <div class="role-cards" id="usersTableBody">
+                <!-- Los usuarios se generarán dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <div id="modalEdit" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2 id="modalTitle">Editar Usuario</h2>
+            <form id="editForm">
+                <div class="form-group">
+                    <label for="editName">Nombre:</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Correo:</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPosition">Cargo:</label>
+                    <input type="text" id="editPosition" required>
+                </div>
+                <div class="form-group">
+                    <label for="editArea">Área de Trabajo:</label>
+                    <select id="editArea" class="filter-select" required>
+                        <option value="">Seleccionar Área</option>
+                        <option value="Urgencias">Urgencias</option>
+                        <option value="Pediatría">Pediatría</option>
+                        <option value="Cirugía">Cirugía</option>
+                        <option value="Cardiología">Cardiología</option>
+                        <option value="Neurología">Neurología</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editRole">Rol:</label>
+                    <select id="editRole" class="filter-select" required>
+                        <option value="">Seleccionar Rol</option>
+                        <option value="Administrador">Administrador</option>
+                        <option value="Coordinador">Coordinador</option>
+                        <option value="Funcionario">Funcionario</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification" class="notification hidden">
+        <span id="notificationMessage"></span>
+    </div>
+
+    <footer>
+        <p>TurnoMed © 2025 - Todos los derechos reservados</p>
+    </footer>
+
+    <script src="calendario.js"></script>
+    <script>
+        // Datos simulados de usuarios
+        let users = [
+            { id: 1, name: "Juan Pérez", email: "juan.perez@hospital.com", position: "Médico", area: "Urgencias", role: "Funcionario", active: true },
+            { id: 2, name: "María Gómez", email: "maria.gomez@hospital.com", position: "Enfermera", area: "Pediatría", role: "Funcionario", active: true },
+            { id: 3, name: "Ana López", email: "ana.lopez@hospital.com", position: "Administrativa", area: "Cirugía", role: "Coordinador", active: true }
+        ];
+
+        // Renderizar la lista de usuarios
+        function renderUsers() {
+            const tableBody = document.getElementById("usersTableBody");
+            tableBody.innerHTML = "";
+            users.forEach(user => {
+                const userCard = document.createElement("div");
+                userCard.className = "role-card";
+                userCard.innerHTML = `
+                    <h3>${user.name}</h3>
+                    <p><strong>Correo:</strong> ${user.email}</p>
+                    <p><strong>Cargo:</strong> ${user.position}</p>
+                    <p><strong>Área:</strong> ${user.area}</p>
+                    <p><strong>Rol:</strong> ${user.role}</p>
+                    <p><strong>Estado:</strong> ${user.active ? "Activo" : "Inactivo"}</p>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary btn-small" onclick="editUser(${user.id})">Editar</button>
+                        <button class="btn btn-undo btn-small" onclick="deleteUser(${user.id})">${user.active ? "Eliminar" : "Restaurar"}</button>
+                    </div>
+                `;
+                tableBody.appendChild(userCard);
+            });
+        }
+
+        // Crear un nuevo usuario
+        document.getElementById("userForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const position = document.getElementById("position").value;
+            const area = document.getElementById("area").value;
+            const role = document.getElementById("role").value;
+
+            // Validar campos
+            if (!name || !email || !position || !area || !role) {
+                showNotification("Por favor, complete todos los campos.", false);
+                return;
+            }
+
+            // Simular operación en menos de 3 segundos
+            setTimeout(() => {
+                const newUser = {
+                    id: users.length + 1,
+                    name,
+                    email,
+                    position,
+                    area,
+                    role,
+                    active: true
+                };
+                users.push(newUser);
+                renderUsers();
+                document.getElementById("userForm").reset();
+                showNotification("Usuario creado exitosamente.", false);
+            }, 500); // Simulación de 0.5 segundos
+        });
+
+        // Editar un usuario
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+
+            const modal = document.getElementById("modalEdit");
+            document.getElementById("editName").value = user.name;
+            document.getElementById("editEmail").value = user.email;
+            document.getElementById("editPosition").value = user.position;
+            document.getElementById("editArea").value = user.area;
+            document.getElementById("editRole").value = user.role;
+
+            modal.dataset.userId = userId;
+            modal.style.display = "flex";
+        }
+
+        // Guardar cambios al editar
+        document.getElementById("editForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const userId = parseInt(document.getElementById("modalEdit").dataset.userId);
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+
+            const newName = document.getElementById("editName").value;
+            const newEmail = document.getElementById("editEmail").value;
+            const newPosition = document.getElementById("editPosition").value;
+            const newArea = document.getElementById("editArea").value;
+            const newRole = document.getElementById("editRole").value;
+
+            if (newName && newEmail && newPosition && newArea && newRole) {
+                setTimeout(() => {
+                    user.name = newName;
+                    user.email = newEmail;
+                    user.position = newPosition;
+                    user.area = newArea;
+                    user.role = newRole;
+                    renderUsers();
+                    document.getElementById("modalEdit").style.display = "none";
+                    showNotification("Usuario modificado exitosamente.", false);
+                }, 500); // Simulación de 0.5 segundos
+            }
+        });
+
+        // Cerrar modal
+        document.querySelector("#modalEdit .close").addEventListener("click", function() {
+            document.getElementById("modalEdit").style.display = "none";
+        });
+
+        window.addEventListener("click", function(event) {
+            const modal = document.getElementById("modalEdit");
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+
+        // Eliminar o restaurar un usuario
+        function deleteUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+
+            setTimeout(() => {
+                user.active = !user.active; // Alternar estado (eliminar/restaurar)
+                renderUsers();
+                showNotification(user.active ? "Usuario restaurado exitosamente." : "Usuario eliminado. No podrá acceder al sistema.", false);
+            }, 500); // Simulación de 0.5 segundos
+        }
+
+        // Renderizar la lista inicialmente
+        renderUsers();
+    </script>
+</body>
+</html>

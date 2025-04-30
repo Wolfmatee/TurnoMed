@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Cambio de Turno</title>
+    <link rel="stylesheet" href="calendario.css">
+</head>
+<body>
+    <div class="top-nav">
+        <a href="perfil.html" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Volver a mi perfil
+        </a>
+    </div>
+
+    <div class="welcome-container">
+        <h1>Solicitud de Cambio de Turno</h1>
+        <p>Complete el formulario para solicitar un cambio de turno al coordinador</p>
+    </div>
+
+    <div class="calendar-container">
+        <h2>Turno Actual</h2>
+        <p>Seleccione un turno asignado dentro de los próximos 5 días:</p>
+        
+        <div class="filters-container">
+            <div class="filter-group">
+                <label for="fecha-inicio">Fecha de inicio:</label>
+                <input type="date" id="fecha-inicio" class="filter-select">
+            </div>
+            <div class="filter-group">
+                <label for="fecha-fin">Fecha de fin:</label>
+                <input type="date" id="fecha-fin" class="filter-select">
+            </div>
+            <button class="btn btn-primary btn-small">Filtrar</button>
+        </div>
+
+        <div class="turnos-list">
+            <!-- Ejemplo de turnos disponibles -->
+            <div class="turno-item my-shift">
+                <div class="turno-date">Lunes, 15 de Abril 2024</div>
+                <div class="shift">
+                    <p><strong>Horario:</strong> 08:00 - 16:00</p>
+                    <p><strong>Área:</strong> Urgencias</p>
+                    <button class="btn btn-primary btn-small seleccionar-turno">Seleccionar este turno</button>
+                </div>
+            </div>
+            
+            <div class="turno-item">
+                <div class="turno-date">Martes, 16 de Abril 2024</div>
+                <div class="shift">
+                    <p><strong>Horario:</strong> 12:00 - 20:00</p>
+                    <p><strong>Área:</strong> Consultas</p>
+                    <button class="btn btn-primary btn-small seleccionar-turno">Seleccionar este turno</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="formulario-cambio" style="display: none; margin-top: 2rem;">
+            <h2>Propuesta de Nuevo Turno</h2>
+            <p>Turno seleccionado: <span id="turno-seleccionado-info"></span></p>
+            
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="nueva-fecha">Nueva fecha:</label>
+                    <input type="date" id="nueva-fecha" class="filter-select">
+                </div>
+                <div class="filter-group">
+                    <label for="nuevo-horario">Nuevo horario:</label>
+                    <select id="nuevo-horario" class="filter-select">
+                        <option value="">Seleccione un horario</option>
+                        <option value="08:00-16:00">08:00 - 16:00</option>
+                        <option value="12:00-20:00">12:00 - 20:00</option>
+                        <option value="16:00-00:00">16:00 - 00:00</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary btn-small" id="verificar-disponibilidad">Verificar disponibilidad</button>
+            </div>
+            
+            <div id="mensaje-disponibilidad" style="margin: 1rem 0; padding: 1rem; display: none;"></div>
+            
+            <form id="solicitud-cambio-form" style="margin-top: 1rem;">
+                <div class="form-group">
+                    <label for="motivo-cambio">Motivo del cambio (máximo 200 caracteres):</label>
+                    <textarea id="motivo-cambio" class="form-control" rows="4" maxlength="200" required></textarea>
+                    <small id="contador-caracteres">200 caracteres restantes</small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="enviar-solicitud">Enviar Solicitud</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-confirmacion" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Confirmación de Solicitud</h2>
+            <p id="modal-mensaje">Su solicitud de cambio de turno ha sido enviada al coordinador.</p>
+            <p>Recibirá una notificación con la decisión dentro de las próximas 24 horas.</p>
+            <button class="btn btn-primary" id="cerrar-modal">Aceptar</button>
+        </div>
+    </div>
+
+    <div id="notificacion" class="notification hidden">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span id="notificacion-mensaje"></span>
+    </div>
+
+     <script src="calendario.js"></script>
+
+</body>
+</html>

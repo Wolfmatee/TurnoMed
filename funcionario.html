@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurnoMed - Mis Turnos</title>
+    <link rel="stylesheet" href="calendario.css">
+</head>
+<body class="funcionario-view">
+    <div class="app-header">
+        <h1 class="app-title">TurnoMed</h1>
+        <p class="app-subtitle">Mis Turnos</p>
+    </div>
+
+    <nav class="top-nav">
+        <a href="index.html" class="back-btn">← Volver al Inicio</a>
+    </nav>
+    
+    <div class="calendar-container">
+        <div class="user-info">
+            <h2 id="nombreFuncionario"></h2>
+            <span id="rutFuncionario"></span>
+        </div>
+        
+        <div class="filters-container">
+            <div class="filter-group">
+                <label for="monthSelector">Mes:</label>
+                <select id="monthSelector" class="filter-select">
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4" selected>Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="areaFilter">Área:</label>
+                <select id="areaFilter" class="filter-select">
+                    <option value="">Todas las áreas</option>
+                    <option value="Urgencias">Urgencias</option>
+                    <option value="Pediatría">Pediatría</option>
+                    <option value="Cirugía">Cirugía</option>
+                    <option value="Cardiología">Cardiología</option>
+                    <option value="Neurología">Neurología</option>
+                </select>
+            </div>
+            
+            <button id="resetFilters" class="btn btn-small">Limpiar filtros</button>
+        </div>
+        
+        <div class="calendar-header">
+            <h2 class="month-title" id="currentMonth"></h2>
+            <div class="calendar-nav">
+                <button id="prevMonth" class="btn">‹ Mes Anterior</button>
+                <button id="nextMonth" class="btn">Mes Siguiente ›</button>
+            </div>
+        </div>
+        
+        <div class="calendar-grid" id="calendarBody"></div>
+        
+        <!-- Modal para cambio de turno -->
+        <div id="shiftChangeModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>Solicitud de Cambio de Turno</h3>
+                <form id="shiftChangeForm">
+                    <div class="form-group">
+                        <label for="originalShiftDate">Fecha de turno original:</label>
+                        <input type="text" id="originalShiftDate" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="originalShiftDetails">Detalles del turno:</label>
+                        <input type="text" id="originalShiftDetails" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="newShiftDate">Nueva fecha:</label>
+                        <input type="date" id="newShiftDate" required>
+                        <small class="date-range-info"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="newShiftTime">Nuevo horario:</label>
+                        <select id="newShiftTime" required>
+                            <option value="">Seleccione horario</option>
+                            <option value="08:00 - 16:00">08:00 - 16:00</option>
+                            <option value="16:00 - 00:00">16:00 - 00:00</option>
+                            <option value="00:00 - 08:00">00:00 - 08:00</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="changeReason">Motivo (máx. 200 caracteres):</label>
+                        <textarea id="changeReason" maxlength="200" required></textarea>
+                        <div class="char-counter"><span id="charCount">200</span> caracteres restantes</div>
+                    </div>
+                    <div id="availabilityCheck" class="availability-check"></div>
+                    <div class="form-actions">
+                        <button type="button" id="checkAvailabilityBtn" class="btn btn-small">Verificar Disponibilidad</button>
+                        <button type="submit" class="btn">Enviar Solicitud</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Sección de información sobre cambios de turno -->
+        <div class="shift-change-info">
+            <p><strong>Nota:</strong> Puedes solicitar cambios de turno solo para el día actual. Los días disponibles aparecerán resaltados en el calendario.</p>
+        </div>
+    </div>
+
+    <script src="calendario.js"></script>
+</body>
+</html>
