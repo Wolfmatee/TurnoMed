@@ -8,6 +8,54 @@ const funcionarios = [
 const areas = ["Urgencias", "Pediatría", "Cirugía", "Cardiología", "Neurología"];
 const horarios = ["08:00 - 16:00", "16:00 - 00:00", "00:00 - 08:00"];
 
+// Lista para almacenar enlaces compartidos (HU-15)
+const sharedLinks = [];
+
+// Lista para almacenar solicitudes de cambio de turno (HU-05)
+const shiftChangeRequests = [];
+
+// Lista de turnos con estado para HU-12 y HU-13
+const misTurnos = [
+    { id: 1, fecha: "2025-04-04", area: "Urgencias", horario: "08:00 - 16:00", estado: "autorizado" },
+    { id: 2, fecha: "2025-04-12", area: "Urgencias", horario: "16:00 - 00:00", estado: "autorizado" },
+    { id: 3, fecha: "2025-04-15", area: "Urgencias", horario: "16:00 - 00:00", estado: "no autorizado" },
+    { id: 4, fecha: "2025-04-20", area: "Urgencias", horario: "08:00 - 16:00", estado: "autorizado" },
+    { id: 5, fecha: "2025-05-03", area: "Urgencias", horario: "00:00 - 08:00", estado: "autorizado" },
+    { id: 6, fecha: "2025-05-07", area: "Urgencias", horario: "00:00 - 08:00", estado: "no autorizado" }
+];
+
+const allShifts = [
+    { fecha: "2025-04-17", area: "Urgencias", horario: "08:00 - 16:00", funcionario: "Ana Silva" },
+    { fecha: "2025-04-18", area: "Urgencias", horario: "08:00 - 16:00", funcionario: "Carlos López" },
+    { fecha: "2025-04-19", area: "Urgencias", horario: "16:00 - 00:00", funcionario: "María Gómez" },
+    { fecha: "2025-04-20", area: "Urgencias", horario: "08:00 - 16:00", funcionario: "Juan Pérez" },
+    { fecha: "2025-04-21", area: "Urgencias", horario: "00:00 - 08:00", funcionario: "Pedro Sánchez" }
+];
+
+const sampleRequests = [
+    {
+        originalDate: "07/05/2025",
+        newDate: "08/05/2025",
+        newTime: "08:00 - 16:00",
+        reason: "Cita médica personal",
+        status: "Pendiente"
+    },
+    {
+        originalDate: "04/04/2025",
+        newDate: "05/04/2025",
+        newTime: "16:00 - 00:00",
+        reason: "Evento familiar",
+        status: "Aprobado"
+    },
+    {
+        originalDate: "12/04/2025",
+        newDate: "13/04/2025",
+        newTime: "00:00 - 08:00",
+        reason: "Conflicto de horario",
+        status: "Rechazado"
+    }
+];
+
 // ===== FUNCIONES UTILITARIAS =====
 function formatDate(year, month, day) {
     return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
@@ -111,7 +159,6 @@ function initCoordinadorCalendar() {
         const firstDay = getFirstDayOfMonth(month, year);
         const totalDays = daysInMonth(month, year);
 
-        // Obtener fecha actual
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const currentDateStr = formatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
@@ -127,7 +174,6 @@ function initCoordinadorCalendar() {
             const cell = document.createElement('div');
             cell.className = 'calendar-day';
             
-            // Resaltar día actual
             if (dateStr === currentDateStr) {
                 cell.classList.add('current-day');
             }
@@ -151,6 +197,74 @@ function initCoordinadorCalendar() {
         }
     }
 
+    function openChartModal() {
+        const chartModal = document.getElementById('chartModal');
+        chartModal.style.display = 'flex';
+
+        const shiftsByArea = {};
+        areas.forEach(area => {
+            shiftsByArea[area] = 0;
+        });
+
+        Object.values(turnos).forEach(shifts => {
+            shifts.forEach(shift => {
+                if (shiftsByArea[shift.area] !== undefined) {
+                    shiftsByArea[shift.area]++;
+                }
+            });
+        });
+
+        const labels = Object.keys(shiftsByArea);
+        const data = Object.values(shiftsByArea);
+
+        const ctx = document.getElementById('shiftsChart').getContext('2d');
+
+        if (window.shiftsChart instanceof Chart) {
+            window.shiftsChart.destroy();
+        }
+
+        window.shiftsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Cantidad de Turnos',
+                    data: data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
     function setupCoordinadorEventListeners() {
         document.getElementById('prevMonth').addEventListener('click', () => {
             currentMonth = currentMonth === 1 ? 12 : currentMonth - 1;
@@ -165,6 +279,16 @@ function initCoordinadorCalendar() {
         });
 
         document.getElementById('undoButton').addEventListener('click', undoLastAssignment);
+
+        document.querySelector('#modalTurno .close').addEventListener('click', () => {
+            document.getElementById('modalTurno').style.display = 'none';
+        });
+
+        document.getElementById('viewChartBtn').addEventListener('click', openChartModal);
+
+        document.querySelector('#chartModal .close-modal').addEventListener('click', () => {
+            document.getElementById('chartModal').style.display = 'none';
+        });
     }
 
     function openModal(day, month, year) {
@@ -235,13 +359,16 @@ function initCoordinadorCalendar() {
         const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
         showNotification(
             `Turno asignado a ${funcionario.nombre} para el ${formattedDate} en ${area}`,
-            true
+            false
         );
 
         if (notificationTimeout) clearTimeout(notificationTimeout);
         notificationTimeout = setTimeout(() => {
-            if (document.getElementById('notification').classList.contains('hidden')) return;
-            document.getElementById('notification').classList.add('hidden');
+            const notificationEl = document.querySelector('.notification');
+            if (notificationEl && !notificationEl.classList.contains('hidden')) {
+                notificationEl.classList.add('hidden');
+                setTimeout(() => notificationEl.remove(), 300);
+            }
         }, 5000);
     });
 
@@ -265,7 +392,11 @@ function initCoordinadorCalendar() {
         }
         
         lastAssignment = null;
-        document.getElementById('notification').classList.add('hidden');
+        const notificationEl = document.querySelector('.notification');
+        if (notificationEl) {
+            notificationEl.classList.add('hidden');
+            setTimeout(() => notificationEl.remove(), 300);
+        }
     }
 }
 
@@ -275,23 +406,6 @@ function initFuncionarioCalendar() {
     const funcionarioActual = funcionarios.find(f => f.id === funcionarioId);
     let currentMonth = new Date().getMonth() + 1;
     let currentYear = new Date().getFullYear();
-
-    const misTurnos = [
-        { fecha: "2025-04-04", area: "Urgencias", horario: "08:00 - 16:00" },
-        { fecha: "2025-04-12", area: "Urgencias", horario: "16:00 - 00:00" },
-        { fecha: "2025-04-15", area: "Urgencias", horario: "16:00 - 00:00" },
-        { fecha: "2025-04-20", area: "Urgencias", horario: "08:00 - 16:00" },
-        { fecha: "2025-05-03", area: "Urgencias", horario: "00:00 - 08:00" }
-    ];
-
-    // Datos de ejemplo para turnos existentes
-    const allShifts = [
-        { fecha: "2025-04-17", area: "Urgencias", horario: "08:00 - 16:00", funcionario: "Ana Silva" },
-        { fecha: "2025-04-18", area: "Urgencias", horario: "08:00 - 16:00", funcionario: "Carlos López" },
-        { fecha: "2025-04-19", area: "Urgencias", horario: "16:00 - 00:00", funcionario: "María Gómez" },
-        { fecha: "2025-04-20", area: "Urgencias", horario: "08:00 - 16:00", funcionario: "Juan Pérez" },
-        { fecha: "2025-04-21", area: "Urgencias", horario: "00:00 - 08:00", funcionario: "Pedro Sánchez" }
-    ];
 
     document.getElementById('nombreFuncionario').textContent = funcionarioActual.nombre;
     document.getElementById('rutFuncionario').textContent = funcionarioActual.rut;
@@ -313,18 +427,9 @@ function initFuncionarioCalendar() {
             return turnoMonth === month && (selectedArea === '' || t.area === selectedArea);
         });
 
-        const daysOfWeek = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-        daysOfWeek.forEach(day => {
-            const header = document.createElement('div');
-            header.className = 'day-header';
-            header.textContent = day;
-            calendarBody.appendChild(header);
-        });
-
         const firstDay = getFirstDayOfMonth(month, year);
         const totalDays = daysInMonth(month, year);
 
-        // Obtener fecha actual y rango de fechas permitidas (hoy + 5 días siguientes)
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const currentDateStr = formatDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
@@ -332,6 +437,18 @@ function initFuncionarioCalendar() {
         const maxChangeDate = new Date(today);
         maxChangeDate.setDate(today.getDate() + 5);
         const maxChangeDateStr = formatDate(maxChangeDate.getFullYear(), maxChangeDate.getMonth() + 1, maxChangeDate.getDate());
+
+        const daysOfWeek = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+        daysOfWeek.forEach(day => {
+            const header = document.createElement('div');
+            header.className = 'calendar-day';
+            header.style.backgroundColor = '#2c3e50';
+            header.style.color = 'white';
+            header.style.textAlign = 'center';
+            header.style.fontWeight = 'bold';
+            header.textContent = day;
+            calendarBody.appendChild(header);
+        });
 
         for (let i = 0; i < firstDay; i++) {
             const emptyCell = document.createElement('div');
@@ -344,7 +461,6 @@ function initFuncionarioCalendar() {
             const cell = document.createElement('div');
             cell.className = 'calendar-day';
             
-            // Resaltar día actual
             if (dateStr === currentDateStr) {
                 cell.classList.add('current-day');
             }
@@ -361,7 +477,6 @@ function initFuncionarioCalendar() {
                         <p>${turno.horario}</p>
                     `;
                     
-                    // Solo añadir botón para el día actual
                     if (dateStr === currentDateStr) {
                         const changeBtn = document.createElement('button');
                         changeBtn.className = 'btn-change-shift';
@@ -371,6 +486,15 @@ function initFuncionarioCalendar() {
                             openShiftChangeModal(dateStr, `${turno.area} - ${turno.horario}`);
                         });
                         turnoDiv.appendChild(changeBtn);
+
+                        const shareBtn = document.createElement('button');
+                        shareBtn.className = 'btn-share-shift';
+                        shareBtn.textContent = 'Compartir Turno';
+                        shareBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openShareShiftModal(turno);
+                        });
+                        turnoDiv.appendChild(shareBtn);
                     }
                     
                     cell.appendChild(turnoDiv);
@@ -381,34 +505,232 @@ function initFuncionarioCalendar() {
         }
     }
 
+    function openShareShiftModal(turno) {
+        const shareModal = document.getElementById('shareShiftModal');
+        const shiftInfo = document.getElementById('selectedShiftInfo');
+        shareModal.style.display = 'flex';
+        shiftInfo.textContent = `Turno: ${formatDisplayDate(turno.fecha)} ${turno.horario} (${turno.area})`;
+        document.getElementById('sharedLink').innerHTML = '';
+        shareModal.dataset.turnoId = turno.id;
+    }
+
+    document.getElementById('shareShiftForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const turnoId = parseInt(document.getElementById('shareShiftModal').dataset.turnoId);
+        const turno = misTurnos.find(t => t.id === turnoId);
+        if (!turno) {
+            showNotification('Turno no encontrado.', true);
+            return;
+        }
+
+        const recipient = document.getElementById('shareRecipient').value;
+        if (!recipient) {
+            showNotification('Ingresa un correo válido.', true);
+            return;
+        }
+
+        let sharedLink = sharedLinks.find(link => link.turnoId === turnoId);
+        if (!sharedLink) {
+            sharedLink = {
+                turnoId: turnoId,
+                link: `http://turnos.com/share/${Math.random().toString(36).substr(2, 8)}`,
+                created: new Date(),
+                expires: new Date(new Date().getTime() + 48 * 60 * 60 * 1000),
+                sharedWith: new Set()
+            };
+            sharedLinks.push(sharedLink);
+        }
+
+        if (sharedLink.sharedWith.size >= 3) {
+            showNotification('Máximo 3 destinatarios permitidos.', true);
+            return;
+        }
+
+        if (new Date() > sharedLink.expires) {
+            showNotification('El enlace ha expirado.', true);
+            return;
+        }
+
+        sharedLink.sharedWith.add(recipient);
+        document.getElementById('sharedLink').innerHTML = `
+            <p>Enlace generado: <a href="${sharedLink.link}" target="_blank">${sharedLink.link}</a></p>
+            <p>Compartido con: ${Array.from(sharedLink.sharedWith).join(", ")}</p>
+            <p>Válido hasta: ${sharedLink.expires.toLocaleString()}</p>
+        `;
+        showNotification(`Enlace enviado a ${recipient}.`, false);
+        document.getElementById('shareRecipient').value = '';
+    });
+
+    function openHistoryModal() {
+        const historyModal = document.getElementById('historyModal');
+        const historyTableBody = document.getElementById('historyTableBody');
+        historyTableBody.innerHTML = '';
+
+        const requests = shiftChangeRequests.length > 0 ? shiftChangeRequests : sampleRequests;
+
+        if (requests.length === 0) {
+            historyTableBody.innerHTML = '<tr><td colspan="5">No hay solicitudes de cambio.</td></tr>';
+        } else {
+            requests.forEach(request => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${request.originalDate}</td>
+                    <td>${request.newDate}</td>
+                    <td>${request.newTime}</td>
+                    <td>${request.reason}</td>
+                    <td>${request.status}</td>
+                `;
+                historyTableBody.appendChild(row);
+            });
+        }
+
+        historyModal.style.display = 'flex';
+    }
+
+    function openChartModal() {
+        const chartModal = document.getElementById('chartModal');
+        chartModal.style.display = 'flex';
+
+        const shiftsByArea = {};
+        areas.forEach(area => {
+            shiftsByArea[area] = misTurnos.filter(turno => turno.area === area).length;
+        });
+
+        const labels = Object.keys(shiftsByArea);
+        const data = Object.values(shiftsByArea);
+
+        const ctx = document.getElementById('shiftsChart').getContext('2d');
+
+        if (window.shiftsChart instanceof Chart) {
+            window.shiftsChart.destroy();
+        }
+
+        window.shiftsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Cantidad de Turnos',
+                    data: data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    function openSueldoModal() {
+        const sueldoModal = document.getElementById('sueldoModal');
+        sueldoModal.style.display = 'flex';
+
+        const currentMonth = new Date().getMonth() + 1;
+        const hoursByArea = {};
+        const valorPorHora = 10; // Valor por hora en USD (ajustable según necesidad)
+
+        // Calcular horas trabajadas por área (asumiendo 8 horas por turno)
+        areas.forEach(area => {
+            const turnosMes = misTurnos.filter(t => {
+                const turnoMonth = parseInt(t.fecha.split('-')[1]);
+                return turnoMonth === currentMonth && t.area === area;
+            });
+            hoursByArea[area] = turnosMes.length * 8; // 8 horas por turno
+        });
+
+        const labels = Object.keys(hoursByArea);
+        const sueldoData = labels.map(area => hoursByArea[area] * valorPorHora);
+
+        const ctx = document.getElementById('sueldoChart').getContext('2d');
+
+        if (window.sueldoChart instanceof Chart) {
+            window.sueldoChart.destroy();
+        }
+
+        window.sueldoChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Sueldo (USD)',
+                    data: sueldoData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 10
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
     function openShiftChangeModal(dateStr, shiftDetails) {
         const modal = document.getElementById('shiftChangeModal');
         const today = new Date();
         const maxDate = new Date(today);
         maxDate.setDate(today.getDate() + 5);
 
-        // Configurar valores del formulario
         document.getElementById('originalShiftDate').value = formatDisplayDate(dateStr);
         document.getElementById('originalShiftDetails').value = shiftDetails;
         
-        // Configurar rango de fechas permitido
         const dateInput = document.getElementById('newShiftDate');
         dateInput.min = today.toISOString().split('T')[0];
         dateInput.max = maxDate.toISOString().split('T')[0];
         dateInput.value = '';
         
-        // Limpiar verificaciones anteriores
         document.getElementById('availabilityCheck').textContent = '';
         document.getElementById('newShiftTime').value = '';
         document.getElementById('changeReason').value = '';
         document.getElementById('charCount').textContent = '200';
         
-        // Mostrar información de rango de fechas
         document.querySelector('.date-range-info').textContent = 
             `Puedes seleccionar entre ${formatDisplayDate(dateInput.min)} y ${formatDisplayDate(dateInput.max)}`;
         
-        // Mostrar modal
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
     }
 
     function setupFuncionarioEventListeners() {
@@ -438,18 +760,42 @@ function initFuncionarioCalendar() {
             updateFuncionarioCalendar(currentMonth, currentYear);
         });
 
-        // Configurar evento para cerrar modal
-        document.querySelector('.close-modal').addEventListener('click', () => {
+        document.querySelector('#shiftChangeModal .close-modal').addEventListener('click', () => {
             document.getElementById('shiftChangeModal').style.display = 'none';
         });
 
-        // Configurar evento para verificar disponibilidad
+        document.querySelector('#shareShiftModal .close-modal').addEventListener('click', () => {
+            document.getElementById('shareShiftModal').style.display = 'none';
+        });
+
+        document.querySelector('#historyModal .close-modal').addEventListener('click', () => {
+            document.getElementById('historyModal').style.display = 'none';
+        });
+
+        document.querySelector('#chartModal .close-modal').addEventListener('click', () => {
+            document.getElementById('chartModal').style.display = 'none';
+        });
+
+        document.querySelector('#sueldoModal .close-modal').addEventListener('click', () => {
+            document.getElementById('sueldoModal').style.display = 'none';
+        });
+
+        document.getElementById('viewHistoryBtn').addEventListener('click', openHistoryModal);
+
+        document.getElementById('viewChartBtn').addEventListener('click', openChartModal);
+
+        document.getElementById('viewSueldoBtn').addEventListener('click', openSueldoModal);
+
         document.getElementById('checkAvailabilityBtn').addEventListener('click', checkShiftAvailability);
 
-        // Configurar evento para enviar formulario
         document.getElementById('shiftChangeForm').addEventListener('submit', function(e) {
             e.preventDefault();
             submitShiftChangeRequest();
+        });
+
+        document.getElementById('changeReason').addEventListener('input', function() {
+            const remaining = 200 - this.value.length;
+            document.getElementById('charCount').textContent = remaining;
         });
     }
 
@@ -499,14 +845,14 @@ function initFuncionarioCalendar() {
             return;
         }
         
-        // Aquí iría la lógica para enviar la solicitud
-        console.log('Solicitud enviada:', { 
-            originalDate, 
-            newDate, 
-            newTime, 
-            reason 
+        shiftChangeRequests.push({
+            originalDate,
+            newDate,
+            newTime,
+            reason,
+            status: "Pendiente"
         });
-        
+
         showNotification('Solicitud enviada al coordinador');
         document.getElementById('shiftChangeModal').style.display = 'none';
     }
